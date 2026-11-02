@@ -1,42 +1,32 @@
-![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
+# Kalman ASIC — shared top-level ALU experiment
 
-# Tiny Tapeout Verilog Project Template
+**Suggested repository:** `ttsky-kalman1bit-shared-alu`
 
-- [Read the documentation for project](docs/info.md)
+This is a controlled RTL architecture experiment derived from
+[`ttsky-kalman1bitfulladder-optimized`](https://github.com/nysmlk161160-commits/ttsky-kalman1bitfulladder-optimized).
 
-## What is Tiny Tapeout?
+Only the **top-level** arithmetic scheduling is changed:
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+- Original: two separate 11-bit arithmetic expressions (`S=P+R`, `delta=Z-X`) and one shared 10-bit X/P update adder/subtractor.
+- This experiment: **one** time-multiplexed 11-bit add/subtract expression for all four operations.
+- The original `kalman_div1` and `kalman_mul1` single-bit serial engines, control state sequence, pins, test vectors, `src/config.json` and clock-period target are preserved.
 
-To learn more and get started, visit https://tinytapeout.com.
+For installation in a new template, read **README_REPLACE.txt**.
 
-## Set up your Verilog project
+## Hypothesis — to test, not to assume
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+The change can reduce arithmetic logic duplication, but new operand MUXing may offset the gain and may change critical-path timing. Compare **final Standard Cell Area, post-route Core Utilisation, worst setup/hold, routed DRC/LVS and actual latency** at the same constraints.
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+## Relevant baseline (previous routed report)
 
-## Enable GitHub actions to build the results page
+- Final Standard Cell Area: 13,270.2 um^2
+- Final Core Utilisation: 80.4582%
+- 20 ns clock; worst setup slack +8.901932 ns, worst hold slack +0.109148 ns
+- Normal RTL latency: 267 cycles (5.34 us @ 50 MHz)
+- Normal gate-level observed latency: 268 cycles (5.36 us @ 50 MHz)
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+These **baseline** figures do not describe the new shared-ALU design.
 
-## Resources
+### Protocol qualification
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
-
-## What next?
-
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+The shared-ALU schedule assumes the documented test sequence: input writes finish before `start`. Concurrent write-enable and start on the same clock edge are not supported by this variant; see `docs/info.md`.

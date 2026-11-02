@@ -1,0 +1,23 @@
+Validation performed during package assembly:
+
+- Inspected the public baseline GitHub files:
+  src/project.v, src/config.json, info.yaml, test/test.py,
+  test/Makefile, test/tb.v and docs/info.md.
+- DIV and MUL module behavior preserved from baseline source.
+- A pure-Python clock-edge behavioral model was built to compare baseline
+  scheduling vs shared-ALU scheduling, including the serial DIV/MUL loops.
+- 65 original test vectors: 58 normal (267 cycles), 7 fast (189 cycles).
+- 2000 additional random vectors: 1999 normal, 1 fast.
+- All 2065 cases matched output and completion timing in the Python model.
+- The original 65 vectors also matched the independent fixed-point
+  reference formula in the Python model.
+- JSON syntax and Python test syntax checked.
+
+IMPORTANT LIMITATIONS:
+- This is NOT a compiled Verilog simulation, formal equivalence proof, or
+  physical PPA result. Icarus Verilog/Cocotb/LibreLane were not available in
+  the local package-generation environment.
+- In the new repository, run RTL simulation plus GDS / precheck / gl_test.
+- Only compare PPA when the full physical flow completed using the same
+  constraints and corner definitions.
+- Write-enable + start simultaneously is outside the intended test protocol.
